@@ -155,23 +155,25 @@ async function getQuote() {
   }
 }
 async function swap() {
-  const provider = window.phantom?.solana;
-
-  if (!provider || !provider.isPhantom) {
-    alert("Open inside Phantom");
-    return;
-  }
-
-  const amount = document.getElementById("amount").value;
-  const from = document.getElementById("from").value;
-  const to = document.getElementById("to").value;
-
-  if (!amount) {
-    alert("Enter amount");
-    return;
-  }
-
   try {
+    const provider = window.phantom?.solana;
+
+    if (!provider || !provider.isPhantom) {
+      alert("Open inside Phantom");
+      return;
+    }
+
+    await provider.connect();
+
+    const amountInput = document.getElementById("amount").value;
+    const from = document.getElementById("from").value;
+    const to = document.getElementById("to").value;
+
+    if (!amountInput) {
+      alert("Enter amount");
+      return;
+    }
+
     const inputMint =
       from === "SOL"
         ? "So11111111111111111111111111111111111111112"
@@ -182,9 +184,23 @@ async function swap() {
         ? "So11111111111111111111111111111111111111112"
         : "EPjFWdd5AufqSSqeM2q8b2G6z9y1K6uH3b6rYh4qz7";
 
-    const quote = await fetch(
-      `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount * 1000000000}&slippageBps=50`
+    // ✅ FIXED decimals
+    const amount =
+      from === "SOL"
+        ? Math.floor(amountInput * 1e9)
+        : Math.floor(amountInput * 1e6);
+
+    // ✅ FIXED quote handling
+    const quoteData = await fetch(
+      `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
     ).then((res) => res.json());
+
+    const quote = quoteData.data[0];
+
+    if (!quote) {
+      alert("No route found");
+      return;
+    }
 
     const swapRes = await fetch("https://quote-api.jup.ag/v6/swap", {
       method: "POST",
@@ -199,9 +215,13 @@ async function swap() {
     }).then((res) => res.json());
 
     const tx = swapRes.swapTransaction;
-    const txBuf = Uint8Array.from(atob(tx), (c) => c.charCodeAt(0));
 
-    const transaction = solanaWeb3.VersionedTransaction.deserialize(txBuf);
+    const txBuf = Uint8Array.from(atob(tx), (c) =>
+      c.charCodeAt(0)
+    );
+
+    const transaction =
+      solanaWeb3.VersionedTransaction.deserialize(txBuf);
 
     const signed = await provider.signTransaction(transaction);
 
@@ -209,12 +229,15 @@ async function swap() {
       "https://api.mainnet-beta.solana.com"
     );
 
-    const txid = await connection.sendRawTransaction(signed.serialize());
+    const txid = await connection.sendRawTransaction(
+      signed.serialize()
+    );
 
     alert("Swap sent! TX: " + txid);
+
   } catch (err) {
     console.error(err);
-    alert("Swap failed");
+    alert("Swap failed: " + err.message);
   }
 }
 </script>
