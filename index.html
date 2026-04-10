@@ -192,8 +192,8 @@ async function swap() {
 
     // ✅ FIXED quote handling
     const quoteData = await fetch(
-      https://api.jup.ag/swap/v1/quoteinputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
-    ).then((res) => res.json());
+  `https://api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
+).then((res) => res.json());
 
     const quote = quoteData.data[0];
 
@@ -202,7 +202,7 @@ async function swap() {
       return;
     }
 
-    const swapRes = await fetch(https://api.jup.ag/swap/v1/swap, {
+    const swapRes = await fetch("https://api.jup.ag/swap/v1/swap", { {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
