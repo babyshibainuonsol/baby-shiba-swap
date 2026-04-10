@@ -91,22 +91,27 @@
   </button>
 
 </div>
-let walletAddress = null;
+<script>
+
+function getQuote() {
+  // your existing code
+}
 
 async function connectWallet() {
-  if (window.solana && window.solana.isPhantom) {
-    try {
+  try {
+    if (window.solana && window.solana.isPhantom) {
       const resp = await window.solana.connect();
-      walletAddress = resp.publicKey.toString();
-
-      alert("Connected: " + walletAddress);
-    } catch (err) {
-      alert("Connection failed");
+      alert("Connected: " + resp.publicKey.toString());
+    } else {
+      window.open("https://phantom.app/ul/browse/" + window.location.href, "_blank");
     }
-  } else {
-    alert("Phantom Wallet not found. Install it.");
+  } catch (err) {
+    console.log(err);
+    alert("Connection failed");
   }
 }
+
+</script>
 
 <script>
 function getQuote() {
