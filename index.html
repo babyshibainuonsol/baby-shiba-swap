@@ -177,12 +177,12 @@ async function swap() {
     const inputMint =
       from === "SOL"
         ? "So11111111111111111111111111111111111111112"
-        : "EPjFWdd5AufqSSqeM2q8b2G6z9y1K6uH3b6rYh4qz7";
+        : "EPjFWdd5AufqSSqeM2q8G6uH3b6rYh4qz7wZrPp6";
 
     const outputMint =
       to === "SOL"
         ? "So11111111111111111111111111111111111111112"
-        : "EPjFWdd5AufqSSqeM2q8b2G6z9y1K6uH3b6rYh4qz7";
+        : "EPjFWdd5AufqSSqeM2q8G6uH3b6rYh4qz7wZrPp6";
 
     // ✅ FIXED decimals
     const amount =
@@ -195,12 +195,13 @@ async function swap() {
   `https://api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
 ).then((res) => res.json());
 
-    const quote = quoteData.data[0];
+    if (!quoteData || !quoteData.data || quoteData.data.length === 0) {
+  console.log("Quote API error:", quoteData);
+  alert("No route found or API error");
+  return;
+}
 
-    if (!quote) {
-      alert("No route found");
-      return;
-    }
+const quote = quoteData.data[0];
 
     const swapRes = await fetch("https://api.jup.ag/swap/v1/swap", {
       method: "POST",
