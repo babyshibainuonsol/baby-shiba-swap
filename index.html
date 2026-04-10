@@ -117,15 +117,43 @@ async function connectWallet() {
 </script>
 
 <script>
-function getQuote() {
+async function getQuote() {
   let amount = document.getElementById("amount").value;
-  if (!amount) return;
+  let from = document.getElementById("from").value;
+  let to = document.getElementById("to").value;
 
-  let result = (amount * 150).toFixed(2);
-  document.getElementById("quote").innerText =
-    "Estimated: " + result;
+  if (!amount) {
+    alert("Enter amount");
+    return;
+  }
+
+  try {
+    // Fetch SOL price (USD)
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
+    );
+
+    const data = await res.json();
+    const solPrice = data.solana.usd;
+
+    let result;
+
+    if (from === "SOL" && to === "USDC") {
+      result = (amount * solPrice).toFixed(2);
+    } else if (from === "USDC" && to === "SOL") {
+      result = (amount / solPrice).toFixed(4);
+    } else {
+      result = amount;
+    }
+
+    document.getElementById("quote").innerText =
+      "Estimated: " + result + " " + to;
+
+  } catch (err) {
+    console.error(err);
+    alert("Error fetching price");
+  }
 }
-
 function swap() {
   alert("Swap feature coming next upgrade 🔥");
 }
