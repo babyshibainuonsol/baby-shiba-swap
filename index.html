@@ -190,7 +190,7 @@ async function swap() {
         : Math.floor(amountInput * 1e6);
 
     const quoteData = await fetch(
-      `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
+      https://api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
     ).then((res) => res.json());
 
     if (!quoteData || !quoteData.data || quoteData.data.length === 0) {
@@ -198,10 +198,10 @@ async function swap() {
       return;
     }
 
-    const quote = quoteData.data[0];
+    const quote = quoteData;
 
     const swapRes = await fetch(
-      "https://quote-api.jup.ag/v6/swap",
+      https://api.jup.ag/swap/v1/swap,
       {
         method: "POST",
         headers: {
