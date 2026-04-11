@@ -189,19 +189,19 @@ async function swap() {
         ? Math.floor(amountInput * 1e9)
         : Math.floor(amountInput * 1e6);
 
-    const quoteData = await fetch(
-      https://api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
-    ).then((res) => res.json());
+    const quoteData = await const quoteData = await fetch(
+  `https://api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
+).then((res) => res.json());.then((res) => res.json());
 
     if (!quoteData || !quoteData.data || quoteData.data.length === 0) {
       alert("No route found");
       return;
     }
 
-    const quote = quoteData;
+    const quote = quoteData.data[0];
 
     const swapRes = await fetch(
-      https://api.jup.ag/swap/v1/swap,
+  "https://api.jup.ag/swap/v1/swap",
       {
         method: "POST",
         headers: {
