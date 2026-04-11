@@ -177,12 +177,12 @@ async function swap() {
     const inputMint =
       from === "SOL"
         ? "So11111111111111111111111111111111111111112"
-        : "EPjFWdd5AufqSSqeM2q8b2G6z9y1K6uH3b6rYh4qz7";
+        : "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
     const outputMint =
       to === "SOL"
         ? "So11111111111111111111111111111111111111112"
-        : "EPjFWdd5AufqSSqeM2q8b2G6z9y1K6uH3b6rYh4qz7";
+        : "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 
     const amount =
       from === "SOL"
@@ -190,7 +190,7 @@ async function swap() {
         : Math.floor(amountInput * 1e6);
 
     const quoteData = await fetch(
-  `https://api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
+  `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
 ).then((res) => res.json());
 
     if (!quoteData || !quoteData.data || quoteData.data.length === 0) {
@@ -201,7 +201,7 @@ async function swap() {
     const quote = quoteData.data[0];
 
     const swapRes = await fetch(
-  "https://api.jup.ag/swap/v1/swap",
+  "https://quote-api.jup.ag/v6/swap,
       {
         method: "POST",
         headers: {
