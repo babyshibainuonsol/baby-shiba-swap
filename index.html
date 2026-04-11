@@ -177,43 +177,43 @@ async function swap() {
     const inputMint =
       from === "SOL"
         ? "So11111111111111111111111111111111111111112"
-        : "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+        : "EPjFWdd5AufqSSqeM2q8b2G6z9y1K6uH3b6rYh4qz7";
 
     const outputMint =
       to === "SOL"
         ? "So11111111111111111111111111111111111111112"
-        : "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+        : "EPjFWdd5AufqSSqeM2q8b2G6z9y1K6uH3b6rYh4qz7";
 
-    // ✅ FIXED decimals
     const amount =
       from === "SOL"
         ? Math.floor(amountInput * 1e9)
         : Math.floor(amountInput * 1e6);
 
-    // ✅ FIXED quote handling
     const quoteData = await fetch(
-  https://quote-api.jup.ag/v6/quoteinputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
-).then((res) => res.json());
+      `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
+    ).then((res) => res.json());
 
-    if (!quoteData || quoteData.error) {
-  console.log("Quote API error:", quoteData);
-  alert("No route found or API error");
-  return;
-}
+    if (!quoteData || !quoteData.data || quoteData.data.length === 0) {
+      alert("No route found");
+      return;
+    }
 
-const quote = quoteData;
+    const quote = quoteData.data[0];
 
-    const swapRes = await fetch(https://quote-api.jup.ag/v6/swap, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        quoteResponse: quote,
-        userPublicKey: provider.publicKey.toString(),
-        wrapUnwrapSOL: true,
-      }),
-    }).then((res) => res.json());
+    const swapRes = await fetch(
+      "https://quote-api.jup.ag/v6/swap",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          quoteResponse: quote,
+          userPublicKey: provider.publicKey.toString(),
+          wrapUnwrapSOL: true,
+        }),
+      }
+    ).then((res) => res.json());
 
     const tx = swapRes.swapTransaction;
 
@@ -234,11 +234,11 @@ const quote = quoteData;
       signed.serialize()
     );
 
-    alert("Swap sent! TX: " + txid);
+    alert("✅ Swap sent! TX: " + txid);
 
   } catch (err) {
     console.error(err);
-    alert("Swap failed: " + err.message);
+    alert("❌ Swap failed: " + err.message);
   }
 }
 </script>
