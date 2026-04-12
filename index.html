@@ -195,21 +195,34 @@ async function swap() {
         ? Math.floor(amountInput * 1e9)
         : Math.floor(amountInput * 1e6);
 
+    // =========================
+    // 🟡 STEP 1: GET QUOTE
+    // =========================
     const quoteData = await fetch(
-      `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
+      `https://api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
     ).then((res) => res.json());
 
-    console.log("QUOTE RESPONSE:", quoteData);
+    console.log("QUOTE FULL:", quoteData);
 
-    if (!quoteData || !quoteData.data || quoteData.data.length === 0) {
-      alert("No route found");
+    // 🛑 GUARD #1 (ERROR FROM API)
+    if (quoteData.error) {
+      alert("Quote error: " + quoteData.error);
+      return;
+    }
+
+    // 🛑 GUARD #2 (NO ROUTES)
+    if (!quoteData.data || quoteData.data.length === 0) {
+      alert("No swap routes found");
       return;
     }
 
     const quote = quoteData.data[0];
 
+    // =========================
+    // 🟡 STEP 2: BUILD SWAP TX
+    // =========================
     const swapRes = await fetch(
-      "https://quote-api.jup.ag/v6/swap",
+      "https://api.jup.ag/swap/v1/swap",
       {
         method: "POST",
         headers: {
@@ -218,11 +231,23 @@ async function swap() {
         body: JSON.stringify({
           quoteResponse: quote,
           userPublicKey: provider.publicKey.toString(),
-          wrapUnwrapSOL: true,
+          wrapAndUnwrapSol: true,
         }),
       }
     ).then((res) => res.json());
 
+    console.log("SWAP RESPONSE:", swapRes);
+
+    // 🛑 GUARD #3 (NO TRANSACTION RETURNED)
+    if (!swapRes.swapTransaction) {
+      alert("Swap build failed");
+      console.log(swapRes);
+      return;
+    }
+
+    // =========================
+    // 🟡 STEP 3: SEND TX
+    // =========================
     const tx = swapRes.swapTransaction;
 
     const txBuf = Uint8Array.from(atob(tx), (c) =>
