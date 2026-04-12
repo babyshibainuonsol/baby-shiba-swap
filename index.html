@@ -211,12 +211,12 @@ async function swap() {
     }
 
     // 🛑 GUARD #2 (NO ROUTES)
-    if (!quoteData.data || quoteData.data.length === 0) {
-      alert("No swap routes found");
-      return;
+    if (!quoteData.routePlan || quoteData.routePlan.length === 0) {
+  alert("No swap routes found");
+  return;
     }
 
-    const quote = quoteData.data[0];
+    const quote = quoteData;
 
     // =========================
     // 🟡 STEP 2: BUILD SWAP TX
