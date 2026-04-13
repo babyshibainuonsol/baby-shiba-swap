@@ -196,25 +196,36 @@ async function swap() {
         : Math.floor(amountInput * 1e6);
 
     // =========================
-    // 🟡 STEP 1: GET QUOTE
-    // =========================
-    const quoteData = await fetch(
+// 🟡 STEP 1: GET QUOTE
+// =========================
+const quoteRes = await fetch(
   `https://api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
-).then(res => res.json());
+);
+
+// 👇 check if request failed
+if (!quoteRes.ok) {
+  const text = await quoteRes.text();
+  console.log("QUOTE ERROR RAW:", text);
+  alert("Failed to fetch quote");
+  return;
+}
+
+// 👇 parse JSON
+const quoteData = await quoteRes.json();
 
 console.log("QUOTE FULL:", quoteData);
 
-    // 🛑 GUARD #1 (ERROR FROM API)
-    if (quoteData.error) {
-      alert("Quote error: " + quoteData.error);
-      return;
-    }
+// 🛑 GUARD #1
+if (quoteData.error) {
+  alert("Quote error: " + quoteData.error);
+  return;
+}
 
-    // 🛑 GUARD #2 (NO ROUTES)
-    if (!quoteData || !quoteData.outAmount) {
+// 🛑 GUARD #2
+if (!quoteData || !quoteData.outAmount) {
   alert("No swap route found");
   return;
-    }
+}
 
     const quote = quoteData;
 
