@@ -1,4 +1,14 @@
 export default async function handler(req, res) {
+  // ✅ Allow frontend to call backend
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // ✅ Handle preflight request
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   try {
     const response = await fetch(
       "https://api.jup.ag/swap/v1/swap",
@@ -13,8 +23,9 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    res.status(200).json(data);
+    return res.status(200).json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("SWAP ERROR:", err);
+    return res.status(500).json({ error: err.message });
   }
 }
