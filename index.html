@@ -114,25 +114,6 @@ async function connectWallet() {
 }
 
 async function getQuote() {
-  const amount = document.getElementById("amount").value;
-
-  if (!amount) {
-    alert("Enter amount");
-    return;
-  }
-
-  console.log("Quote function works ✅");
-}
-
-async function swap() {
-  console.log("Swap function works ✅");
-}
-
-</script>
-
-
-<script>
-async function getQuote() {
   let amount = document.getElementById("amount").value;
   let from = document.getElementById("from").value;
   let to = document.getElementById("to").value;
@@ -143,7 +124,6 @@ async function getQuote() {
   }
 
   try {
-    // Fetch SOL price (USD)
     const res = await fetch(
       "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
     );
@@ -169,7 +149,7 @@ async function getQuote() {
     alert("Error fetching price");
   }
 }
-<script>
+
 async function swap() {
   try {
     const provider = window.phantom?.solana;
@@ -210,39 +190,33 @@ async function swap() {
         ? Math.floor(amountInput * 1e9)
         : Math.floor(amountInput * 1e6);
 
-    // =========================
-    // 🟡 STEP 1: GET QUOTE
-    // =========================
+    // STEP 1
     const quoteRes = await fetch(
       `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
     );
 
     const quoteData = await quoteRes.json();
 
-    if (!quoteData || !quoteData.data || quoteData.data.length === 0) {
+    if (!quoteData.data || quoteData.data.length === 0) {
       alert("No route found");
       return;
     }
 
     const route = quoteData.data[0];
 
-    console.log("ROUTE:", route);
-
-    // =========================
-    // 🟡 STEP 2: GET SWAP TX
-    // =========================
+    // STEP 2 (FIXED ENDPOINT ✅)
     const swapRes = await fetch(
-      "https://quote-api.jup.ag/v6/swap",
+      "https://api.jup.ag/swap/v1/swap",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-  quoteResponse: route,
-  userPublicKey: provider.publicKey.toString(),
-  wrapAndUnwrapSol: true,
-})
+          quoteResponse: route,
+          userPublicKey: provider.publicKey.toString(),
+          wrapAndUnwrapSol: true,
+        }),
       }
     );
 
@@ -254,9 +228,7 @@ async function swap() {
       return;
     }
 
-    // =========================
-    // 🟡 STEP 3: SIGN + SEND
-    // =========================
+    // STEP 3
     const txBuf = Uint8Array.from(atob(swapData.swapTransaction), c =>
       c.charCodeAt(0)
     );
@@ -281,6 +253,7 @@ async function swap() {
     alert("❌ Swap failed: " + err.message);
   }
 }
+
 </script>
 
 </body>
