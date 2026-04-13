@@ -200,7 +200,8 @@ async function swap() {
     // =========================
     const quoteData = await fetch(
   `https://api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
-).then((res) => res.json());
+)const raw = await swapRes.text();
+const swapData = JSON.parse(raw);
 
     console.log("QUOTE FULL:", quoteData);
 
@@ -221,24 +222,28 @@ async function swap() {
     // =========================
     // 🟡 STEP 2: BUILD SWAP TX
     // =========================
-    const swapRes = await fetch("https://baby-shiba-swap.vercel.app/api/swap",
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      quoteResponse: quoteData,
-      userPublicKey: provider.publicKey.toString(),
-      wrapAndUnwrapSol: true,
-    }),
-  }
-).then((res) => res.json());
+    const swapRes = await fetch("/api/swap", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    quoteResponse: quoteData,
+    userPublicKey: provider.publicKey.toString(),
+  }),
+});
+
+// 👇 THIS IS THE IMPORTANT PART
+const raw = await swapRes.text();
+console.log("SERVER RESPONSE:", raw);
+
+// safely parse
+const swapData = JSON.parse(raw);
 
     console.log("SWAP RESPONSE:", swapRes);
 
     // 🛑 GUARD #3 (NO TRANSACTION RETURNED)
-    if (!swapRes.swapTransaction) {
+    if (!swapData.swapTransaction) {
       alert("Swap build failed");
       console.log(swapRes);
       return;
@@ -247,7 +252,7 @@ async function swap() {
     // =========================
     // 🟡 STEP 3: SEND TX
     // =========================
-    const tx = swapRes.swapTransaction;
+    const tx = swapData.swapTransaction;
 
     const txBuf = Uint8Array.from(atob(tx), (c) =>
       c.charCodeAt(0)
