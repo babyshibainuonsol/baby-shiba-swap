@@ -1,15 +1,16 @@
 export default async function handler(req, res) {
-  // ✅ Allow frontend to call backend
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  // ✅ Handle preflight request
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
   try {
+    const body = req.body;
+
+    // 🛑 DEBUG
+    console.log("BODY:", body);
+
+    if (!body || !body.quoteResponse) {
+      return res.status(400).json({
+        error: "Missing body or quoteResponse",
+      });
+    }
+
     const response = await fetch(
       "https://api.jup.ag/swap/v1/swap",
       {
@@ -17,15 +18,20 @@ export default async function handler(req, res) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(req.body),
+        body: JSON.stringify({
+          quoteResponse: body.quoteResponse,
+          userPublicKey: body.userPublicKey,
+          wrapAndUnwrapSol: true,
+        }),
       }
     );
 
     const data = await response.json();
 
-    return res.status(200).json(data);
+    res.status(200).json(data);
+
   } catch (err) {
-    console.error("SWAP ERROR:", err);
-    return res.status(500).json({ error: err.message });
+    console.error("API ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 }
