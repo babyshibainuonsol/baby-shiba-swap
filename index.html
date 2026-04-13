@@ -221,8 +221,7 @@ async function swap() {
     // =========================
     // 🟡 STEP 2: BUILD SWAP TX
     // =========================
-    const swapRes = await fetch(
-  "/api/swap",
+    const swapRes = await fetch("https://baby-shiba-swap.vercel.app/api/swap",
   {
     method: "POST",
     headers: {
