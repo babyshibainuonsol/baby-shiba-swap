@@ -200,10 +200,9 @@ async function swap() {
     // =========================
     const quoteData = await fetch(
   `https://api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
-)const raw = await swapRes.text();
-const swapData = JSON.parse(raw);
+).then(res => res.json());
 
-    console.log("QUOTE FULL:", quoteData);
+console.log("QUOTE FULL:", quoteData);
 
     // 🛑 GUARD #1 (ERROR FROM API)
     if (quoteData.error) {
@@ -234,20 +233,29 @@ const swapData = JSON.parse(raw);
 });
 
 // 👇 THIS IS THE IMPORTANT PART
+const swapRes = await fetch("/api/swap", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    quoteResponse: quoteData,
+    userPublicKey: provider.publicKey.toString(),
+  }),
+});
+
+// 👇 DEBUG RESPONSE
 const raw = await swapRes.text();
 console.log("SERVER RESPONSE:", raw);
 
-// safely parse
-const swapData = JSON.parse(raw);
-
-    console.log("SWAP RESPONSE:", swapRes);
-
-    // 🛑 GUARD #3 (NO TRANSACTION RETURNED)
-    if (!swapData.swapTransaction) {
-      alert("Swap build failed");
-      console.log(swapRes);
-      return;
-    }
+// parse safely
+let swapData;
+try {
+  swapData = JSON.parse(raw);
+} catch (e) {
+  alert("Server returned invalid JSON");
+  return;
+}
 
     // =========================
     // 🟡 STEP 3: SEND TX
