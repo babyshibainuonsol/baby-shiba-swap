@@ -95,26 +95,41 @@
 <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
 
 <script>
+
 async function connectWallet() {
   try {
     const provider = window.phantom?.solana;
 
     if (!provider || !provider.isPhantom) {
-      alert("Please open this inside Phantom Wallet browser");
+      alert("Open inside Phantom");
       return;
     }
 
     const resp = await provider.connect();
-    console.log("Connected:", resp.publicKey.toString());
+    alert("Connected: " + resp.publicKey.toString());
 
-    alert("Wallet connected: " + resp.publicKey.toString());
   } catch (err) {
     console.error(err);
-    alert("Connection failed");
   }
 }
 
+async function getQuote() {
+  const amount = document.getElementById("amount").value;
+
+  if (!amount) {
+    alert("Enter amount");
+    return;
+  }
+
+  console.log("Quote function works ✅");
+}
+
+async function swap() {
+  console.log("Swap function works ✅");
+}
+
 </script>
+
 
 <script>
 async function getQuote() {
