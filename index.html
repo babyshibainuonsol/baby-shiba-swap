@@ -239,10 +239,10 @@ async function swap() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          route,
-          userPublicKey: provider.publicKey.toString(),
-          wrapAndUnwrapSol: true,
-        }),
+  quoteResponse: route,
+  userPublicKey: provider.publicKey.toString(),
+  wrapAndUnwrapSol: true,
+})
       }
     );
 
