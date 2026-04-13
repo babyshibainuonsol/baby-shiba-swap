@@ -221,19 +221,20 @@ async function swap() {
     // =========================
     // 🟡 STEP 2: BUILD SWAP TX
     // =========================
-    const swapRes = await fetch("https://baby-shiba-swap.vercel.app/api/swap",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          quoteResponse: quoteData,
-          userPublicKey: provider.publicKey.toString(),
-          wrapAndUnwrapSol: true,
-        }),
-      }
-    ).then((res) => res.json());
+    const swapRes = await fetch(
+  "https://quote-api.jup.ag/v6/swap",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      quoteResponse: quoteData,
+      userPublicKey: provider.publicKey.toString(),
+      wrapAndUnwrapSol: true,
+    }),
+  }
+).then((res) => res.json());
 
     console.log("SWAP RESPONSE:", swapRes);
 
