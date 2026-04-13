@@ -149,7 +149,7 @@ async function getQuote() {
     alert("Error fetching price");
   }
 }
-
+<script>
 async function swap() {
   try {
     const provider = window.phantom?.solana;
@@ -170,6 +170,7 @@ async function swap() {
       return;
     }
 
+    // Token mints
     const inputMint =
       from === "SOL"
         ? "So11111111111111111111111111111111111111112"
@@ -185,12 +186,15 @@ async function swap() {
       return;
     }
 
+    // Convert amount
     const amount =
       from === "SOL"
         ? Math.floor(amountInput * 1e9)
         : Math.floor(amountInput * 1e6);
 
-    // STEP 1
+    // =========================
+    // 🟡 STEP 1: GET QUOTE
+    // =========================
     const quoteRes = await fetch(
       `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=50`
     );
@@ -204,7 +208,11 @@ async function swap() {
 
     const route = quoteData.data[0];
 
-    // STEP 2 (FIXED ENDPOINT ✅)
+    console.log("ROUTE:", route);
+
+    // =========================
+    // 🟡 STEP 2: GET SWAP TX
+    // =========================
     const swapRes = await fetch(
       "https://quote-api.jup.ag/v6/swap",
       {
@@ -213,24 +221,29 @@ async function swap() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-  route: route,
-  userPublicKey: provider.publicKey.toString(),
-  wrapAndUnwrapSol: true,
-}),
+          route: route,
+          userPublicKey: provider.publicKey.toString(),
+          wrapAndUnwrapSol: true,
+        }),
       }
     );
 
     const swapData = await swapRes.json();
 
+    // 👇 DEBUG LINE (IMPORTANT)
+    console.log("SWAP DATA:", swapData);
+
     if (!swapData.swapTransaction) {
-      console.log(swapData);
       alert("Swap build failed");
       return;
     }
 
-    // STEP 3
-    const txBuf = Uint8Array.from(atob(swapData.swapTransaction), c =>
-      c.charCodeAt(0)
+    // =========================
+    // 🟡 STEP 3: SIGN + SEND
+    // =========================
+    const txBuf = Uint8Array.from(
+      atob(swapData.swapTransaction),
+      (c) => c.charCodeAt(0)
     );
 
     const transaction =
@@ -253,8 +266,8 @@ async function swap() {
     alert("❌ Swap failed: " + err.message);
   }
 }
-
 </script>
+
 
 </body>
 </html>
