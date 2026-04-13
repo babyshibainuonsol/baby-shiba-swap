@@ -232,23 +232,34 @@ if (!quoteData || !quoteData.outAmount) {
     // =========================
 // 🟡 STEP 2: BUILD SWAP TX
 // =========================
-const swapRes = await fetch("https://baby-shiba-swap.vercel.app/api/swap", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    quoteResponse: quoteData,
-    userPublicKey: provider.publicKey.toString(),
-    wrapAndUnwrapSol: true,
-  }),
-});
+let swapRes;
 
-// 👇 DEBUG RESPONSE
+try {
+  console.log("🚀 Sending request to backend...");
+
+  swapRes = await fetch("/api/swap", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      quoteResponse: quoteData,
+      userPublicKey: provider.publicKey.toString(),
+      wrapAndUnwrapSol: true,
+    }),
+  });
+
+} catch (err) {
+  console.error("❌ FETCH FAILED:", err);
+  alert("Network error: " + err.message);
+  return;
+}
+
+// 👇 read raw response
 const raw = await swapRes.text();
-console.log("SERVER RESPONSE:", raw);
+console.log("📦 SERVER RESPONSE:", raw);
 
-// 👇 SAFE PARSE
+// 👇 parse safely
 let swapData;
 try {
   swapData = JSON.parse(raw);
@@ -257,12 +268,11 @@ try {
   return;
 }
 
-// 🛑 GUARD
+// 👇 check result
 if (!swapData.swapTransaction) {
-  alert("Swap build failed");
-  console.log(swapData);
+  alert("Swap failed: " + raw);
   return;
-}
+  }
 
     // =========================
     // 🟡 STEP 3: SEND TX
