@@ -1,13 +1,14 @@
 export default async function handler(req, res) {
   try {
-    // ✅ FIX: parse body safely
-    const body = typeof req.body === "string"
-      ? JSON.parse(req.body)
-      : req.body;
+    // ✅ parse safely
+    const body =
+      typeof req.body === "string"
+        ? JSON.parse(req.body)
+        : req.body;
 
-    console.log("BODY RECEIVED:", body);
+    console.log("BODY:", body);
 
-    const response = await fetch("https://api.jup.ag/swap/v1/swap", {
+    const response = await fetch("https://quote-api.jup.ag/v6/swap", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -16,14 +17,26 @@ export default async function handler(req, res) {
     });
 
     const text = await response.text();
-    console.log("JUP RESPONSE:", text);
+    console.log("JUP RAW:", text);
 
-    const data = JSON.parse(text);
+    // ✅ SAFE PARSE (NO CRASH)
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      return res.status(500).json({
+        error: "Invalid JSON from Jupiter",
+        raw: text,
+      });
+    }
 
-    res.status(200).json(data);
+    return res.status(200).json(data);
 
   } catch (err) {
     console.error("SERVER ERROR:", err);
-    res.status(500).json({ error: err.message });
+
+    return res.status(500).json({
+      error: err.message,
+    });
   }
 }
