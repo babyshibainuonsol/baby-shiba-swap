@@ -3,7 +3,7 @@ export default async function handler(req, res) {
     const { route, userPublicKey } = req.body;
 
     if (!route || !userPublicKey) {
-      return res.status(400).json({ error: "Missing params" });
+      return res.status(400).json({ error: "Missing data" });
     }
 
     const response = await fetch(
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          route,
+          quoteResponse: route, // ✅ FIXED
           userPublicKey,
           wrapAndUnwrapSol: true,
         }),
@@ -22,6 +22,8 @@ export default async function handler(req, res) {
     );
 
     const data = await response.json();
+
+    console.log("BACKEND RESPONSE:", data); // 👈 DEBUG
 
     return res.status(200).json(data);
 
