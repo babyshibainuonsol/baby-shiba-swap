@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   try {
-    const response = await fetch("https://api.jup.ag/swap/v1/swap", {
+    const response = await fetch("https://quote-api.jup.ag/v6/swap", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -12,6 +12,7 @@ export default async function handler(req, res) {
 
     res.status(200).json(data);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Server error" });
   }
 }
