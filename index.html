@@ -206,14 +206,14 @@ async function swap() {
 
     // STEP 2 (FIXED ENDPOINT ✅)
     const swapRes = await fetch(
-      "https://api.jup.ag/swap/v1/swap",
+      "https://quote-api.jup.ag/v6/swap",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          quoteResponse: route,
+          route: route ✅,
           userPublicKey: provider.publicKey.toString(),
           wrapAndUnwrapSol: true,
         }),
